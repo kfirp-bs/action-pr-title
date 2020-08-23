@@ -1,8 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const validEvent = ['pull_request'];
-
 function validateTitlePrefix(title, prefix, caseSensitive) {
     if (!caseSensitive) {
         prefix = prefix.toLowerCase();
@@ -15,7 +13,9 @@ async function run() {
     try {
         const eventName = github.context.eventName;
         core.info(`Event name: ${eventName}`);
-        if (validEvent.indexOf(eventName) < 0) {
+        if (!(github.context.payload &&
+              github.context.payload.pull_request &&
+              github.context.payload.pull_request.title)) {
             core.setFailed(`Invalid event: ${eventName}`);
             return;
         }
