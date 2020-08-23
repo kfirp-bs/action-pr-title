@@ -13,14 +13,13 @@ async function run() {
     try {
         const eventName = github.context.eventName;
         core.info(`Event name: ${eventName}`);
-        if (!(github.context.payload &&
-              github.context.payload.pull_request &&
-              github.context.payload.pull_request.title)) {
+        const title = getTitle(github.context.payload);
+
+        if (!title) {
             core.setFailed(`Invalid event: ${eventName}`);
             return;
         }
 
-        const title = github.context.payload.pull_request.title;
         core.info(`Pull Request title: "${title}"`);
         // Check if title pass regex
         const regex = RegExp(core.getInput('regex'));
@@ -55,6 +54,19 @@ async function run() {
 
     } catch (error) {
         core.setFailed(error.message);
+    }
+}
+
+function getTitle(payload) {
+    if (payload && payload.issue && payload.issue.title) {
+        return payload.issue.title;
+    }
+
+    if (payload &&
+        payload.pull_request &&
+        payload.pull_request.title)
+    {
+        return payload.pull_request.title;
     }
 }
 
